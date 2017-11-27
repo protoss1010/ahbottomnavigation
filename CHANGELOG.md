@@ -1,6 +1,9 @@
 ## Changelog
 
-### Newest version: 2.1.0
+### Newest version: 2.1.1
+* 增加 Notification (Badge Size)
+
+### 2.1.0
 
 * Update libraries versions
 * Add enable/disable tab state (with custom color)
