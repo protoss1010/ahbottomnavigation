@@ -30,12 +30,13 @@ public class AHHelper {
 	 * @param drawable
 	 * @param color
 	 * @param forceTint
+	 * @param tintMode
 	 * @return
 	 */
-	public static Drawable getTintDrawable(Drawable drawable, @ColorInt int color, boolean forceTint) {
+	public static Drawable getTintDrawable(Drawable drawable, @ColorInt int color, boolean forceTint, PorterDuff.Mode tintMode) {
 		if (forceTint) {
 			drawable.clearColorFilter();
-			drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+			drawable.setColorFilter(color, tintMode);
 			drawable.invalidateSelf();
 			return drawable;
 		}
@@ -172,15 +173,15 @@ public class AHHelper {
 	 * Update image view color with animation
 	 */
 	public static void updateDrawableColor(final Context context, final Drawable drawable,
-	                                       final ImageView imageView, @ColorInt int fromColor,
-	                                       @ColorInt int toColor, final boolean forceTint) {
+										   final ImageView imageView, @ColorInt int fromColor,
+										   @ColorInt int toColor, final boolean forceTint, final PorterDuff.Mode tintMode) {
 		ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), fromColor, toColor);
 		colorAnimation.setDuration(150);
 		colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 			@Override
 			public void onAnimationUpdate(ValueAnimator animator) {
 				imageView.setImageDrawable(AHHelper.getTintDrawable(drawable,
-						(Integer) animator.getAnimatedValue(), forceTint));
+						(Integer) animator.getAnimatedValue(), forceTint, tintMode));
 				imageView.requestLayout();
 			}
 		});

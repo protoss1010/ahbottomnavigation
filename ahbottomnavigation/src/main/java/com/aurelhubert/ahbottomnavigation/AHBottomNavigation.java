@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -15,6 +16,7 @@ import android.os.Parcelable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
@@ -109,6 +111,7 @@ public class AHBottomNavigation extends FrameLayout {
 	private int bottomNavigationHeight, navigationBarHeight = 0;
 	private float selectedItemWidth, notSelectedItemWidth;
 	private boolean forceTint = false;
+	private PorterDuff.Mode tintMode = PorterDuff.Mode.SRC_IN;
 	private TitleState titleState = TitleState.SHOW_WHEN_ACTIVE;
 
 	// Notifications
@@ -192,36 +195,36 @@ public class AHBottomNavigation extends FrameLayout {
 	private void init(Context context, AttributeSet attrs) {
 		this.context = context;
 		resources = this.context.getResources();
-		
+
 		// Item colors
 		titleColorActive = ContextCompat.getColor(context, R.color.colorBottomNavigationAccent);
 		titleColorInactive = ContextCompat.getColor(context, R.color.colorBottomNavigationInactive);
 		itemDisableColor = ContextCompat.getColor(context, R.color.colorBottomNavigationDisable);
-		
+
 		// Colors for colored bottom navigation
 		coloredTitleColorActive = ContextCompat.getColor(context, R.color.colorBottomNavigationActiveColored);
 		coloredTitleColorInactive = ContextCompat.getColor(context, R.color.colorBottomNavigationInactiveColored);
-		
+
 		if (attrs != null) {
 			TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.AHBottomNavigationBehavior_Params, 0, 0);
 			try {
 				selectedBackgroundVisible = ta.getBoolean(R.styleable.AHBottomNavigationBehavior_Params_selectedBackgroundVisible, false);
 				translucentNavigationEnabled = ta.getBoolean(R.styleable.AHBottomNavigationBehavior_Params_translucentNavigationEnabled, false);
-				
+
 				titleColorActive = ta.getColor(R.styleable.AHBottomNavigationBehavior_Params_accentColor,
 						ContextCompat.getColor(context, R.color.colorBottomNavigationAccent));
 				titleColorInactive = ta.getColor(R.styleable.AHBottomNavigationBehavior_Params_inactiveColor,
 						ContextCompat.getColor(context, R.color.colorBottomNavigationInactive));
 				itemDisableColor = ta.getColor(R.styleable.AHBottomNavigationBehavior_Params_disableColor,
 						ContextCompat.getColor(context, R.color.colorBottomNavigationDisable));
-				
+
 				coloredTitleColorActive = ta.getColor(R.styleable.AHBottomNavigationBehavior_Params_coloredActive,
 						ContextCompat.getColor(context, R.color.colorBottomNavigationActiveColored));
 				coloredTitleColorInactive = ta.getColor(R.styleable.AHBottomNavigationBehavior_Params_coloredInactive,
 						ContextCompat.getColor(context, R.color.colorBottomNavigationInactiveColored));
-				
+
 				colored = ta.getBoolean(R.styleable.AHBottomNavigationBehavior_Params_colored, false);
-				
+
 			} finally {
 				ta.recycle();
 			}
@@ -229,7 +232,7 @@ public class AHBottomNavigation extends FrameLayout {
 
 		notificationTextColor = ContextCompat.getColor(context, android.R.color.white);
 		bottomNavigationHeight = (int) resources.getDimension(R.dimen.bottom_navigation_height);
-		
+
 		itemActiveColor = titleColorActive;
 		itemInactiveColor = titleColorInactive;
 
@@ -453,9 +456,9 @@ public class AHBottomNavigation extends FrameLayout {
 					setBackgroundColor(defaultBackgroundColor);
 				}
 			}
-			
+
 			title.setTextSize(TypedValue.COMPLEX_UNIT_PX, current ? activeSize : inactiveSize);
-			
+
 			if (itemsEnabledStates[i]) {
 				view.setOnClickListener(new OnClickListener() {
 					@Override
@@ -464,12 +467,12 @@ public class AHBottomNavigation extends FrameLayout {
 					}
 				});
 				icon.setImageDrawable(AHHelper.getTintDrawable(items.get(i).getDrawable(context),
-						current ? itemActiveColor : itemInactiveColor, forceTint));
+						current ? itemActiveColor : itemInactiveColor, forceTint, tintMode));
 				title.setTextColor(current ? itemActiveColor : itemInactiveColor);
 				view.setSoundEffectsEnabled(soundEffectsEnabled);
 			} else {
 				icon.setImageDrawable(AHHelper.getTintDrawable(items.get(i).getDrawable(context),
-						itemDisableColor, forceTint));
+						itemDisableColor, forceTint, tintMode));
 				title.setTextColor(itemDisableColor);
 			}
 
@@ -581,7 +584,7 @@ public class AHBottomNavigation extends FrameLayout {
 
 			if (itemsEnabledStates[i]) {
 				icon.setImageDrawable(AHHelper.getTintDrawable(items.get(i).getDrawable(context),
-						currentItem == i ? itemActiveColor : itemInactiveColor, forceTint));
+						currentItem == i ? itemActiveColor : itemInactiveColor, forceTint, tintMode));
 				title.setTextColor(currentItem == i ? itemActiveColor : itemInactiveColor);
 				title.setAlpha(currentItem == i ? 1 : 0);
 				view.setOnClickListener(new OnClickListener() {
@@ -593,11 +596,11 @@ public class AHBottomNavigation extends FrameLayout {
 				view.setSoundEffectsEnabled(soundEffectsEnabled);
 			} else {
 				icon.setImageDrawable(AHHelper.getTintDrawable(items.get(i).getDrawable(context),
-						itemDisableColor, forceTint));
+						itemDisableColor, forceTint, tintMode));
 				title.setTextColor(itemDisableColor);
 				title.setAlpha(0);
 			}
-			
+
 			int width = i == currentItem ? (int) selectedItemWidth :
 					(int) itemWidth;
 
@@ -666,7 +669,7 @@ public class AHBottomNavigation extends FrameLayout {
 				AHHelper.updateTextColor(title, itemInactiveColor, itemActiveColor);
 				AHHelper.updateTextSize(title, inactiveSize, activeSize);
 				AHHelper.updateDrawableColor(context, items.get(itemIndex).getDrawable(context), icon,
-						itemInactiveColor, itemActiveColor, forceTint);
+						itemInactiveColor, itemActiveColor, forceTint, tintMode);
 
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && colored) {
 
@@ -727,7 +730,7 @@ public class AHBottomNavigation extends FrameLayout {
 				AHHelper.updateTextColor(title, itemActiveColor, itemInactiveColor);
 				AHHelper.updateTextSize(title, activeSize, inactiveSize);
 				AHHelper.updateDrawableColor(context, items.get(currentItem).getDrawable(context), icon,
-						itemActiveColor, itemInactiveColor, forceTint);
+						itemActiveColor, itemInactiveColor, forceTint, tintMode);
 			}
 		}
 
@@ -793,7 +796,7 @@ public class AHBottomNavigation extends FrameLayout {
 
 				AHHelper.updateAlpha(title, 0, 1);
 				AHHelper.updateDrawableColor(context, items.get(itemIndex).getDrawable(context), icon,
-						itemInactiveColor, itemActiveColor, forceTint);
+						itemInactiveColor, itemActiveColor, forceTint, tintMode);
 
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && colored) {
 					int finalRadius = Math.max(getWidth(), getHeight());
@@ -860,7 +863,7 @@ public class AHBottomNavigation extends FrameLayout {
 
 				AHHelper.updateAlpha(title, 1, 0);
 				AHHelper.updateDrawableColor(context, items.get(currentItem).getDrawable(context), icon,
-						itemActiveColor, itemInactiveColor, forceTint);
+						itemActiveColor, itemInactiveColor, forceTint, tintMode);
 			}
 		}
 
@@ -887,7 +890,7 @@ public class AHBottomNavigation extends FrameLayout {
 			if (i >= notifications.size()) {
 				break;
 			}
-			
+
 			if (itemPosition != UPDATE_ALL_NOTIFICATIONS && itemPosition != i) {
 				continue;
 			}
@@ -921,10 +924,10 @@ public class AHBottomNavigation extends FrameLayout {
 					Drawable defautlDrawable = ContextCompat.getDrawable(context, R.drawable.notification_background);
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 						notification.setBackground(AHHelper.getTintDrawable(defautlDrawable,
-								currentBackgroundColor, forceTint));
+								currentBackgroundColor, forceTint, tintMode));
 					} else {
 						notification.setBackgroundDrawable(AHHelper.getTintDrawable(defautlDrawable,
-								currentBackgroundColor, forceTint));
+								currentBackgroundColor, forceTint, tintMode));
 					}
 				}
 			}
@@ -1343,6 +1346,10 @@ public class AHBottomNavigation extends FrameLayout {
 		createItems();
 	}
 
+	public void setTintMode(@Nullable PorterDuff.Mode tintMode) {
+		this.tintMode = tintMode;
+	}
+
 	/**
 	 * Return the title state for display
 	 *
@@ -1568,7 +1575,7 @@ public class AHBottomNavigation extends FrameLayout {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Enable the tab item at the given position
 	 * @param position int
@@ -1581,7 +1588,7 @@ public class AHBottomNavigation extends FrameLayout {
 		itemsEnabledStates[position] = true;
 		createItems();
 	}
-	
+
 	/**
 	 * Disable the tab item at the given position
 	 * @param position int
@@ -1594,7 +1601,7 @@ public class AHBottomNavigation extends FrameLayout {
 		itemsEnabledStates[position] = false;
 		createItems();
 	}
-	
+
 	/**
 	 * Set the item disable color
 	 * @param itemDisableColor int
@@ -1602,7 +1609,7 @@ public class AHBottomNavigation extends FrameLayout {
 	public void setItemDisableColor(@ColorInt int itemDisableColor) {
 		this.itemDisableColor = itemDisableColor;
 	}
-	
+
 	////////////////
 	// INTERFACES //
 	////////////////
