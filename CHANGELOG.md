@@ -1,6 +1,9 @@
 ## Changelog
 
-### Newest version: 2.1.1
+### Newest version 2.1.2
+* 增加 TintMode設定 (當setForceTint true有效)
+
+### 2.1.1
 * 增加 Notification (Badge Size)
 
 ### 2.1.0
