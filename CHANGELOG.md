@@ -1,6 +1,8 @@
 ## Changelog
+### Newest version 2.1.3
+* AHBottomNavigationItem 增加 getDrawableRes 方法
 
-### Newest version 2.1.2
+### 2.1.2
 * 增加 TintMode設定 (當setForceTint true有效)
 
 ### 2.1.1
